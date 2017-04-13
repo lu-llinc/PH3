@@ -162,7 +162,7 @@ public class MatchTest {
         normalizer.normalizeTokens(tokens);
         System.out.println(" - text tokens = " + Arrays.toString(tokens));
 
-        Literal[][] cnf = MatchParser.compile(pattern, true, normalizer);
+        Literal[][] cnf = MatchParser.compileBody(pattern, true, normalizer);
         System.out.println(" - cnf = " + Arrays.deepToString(cnf));
         System.out.println();
         int[] eval = null;
@@ -170,7 +170,7 @@ public class MatchTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (int i = 0; i < N; i++) {
-            eval = MatchEval.findRange(tokens, cnf);
+            eval = MatchEval.findRange(tokens, cnf, null);
         }
         stopWatch.stop();
         System.out.println(" - eval = " + Arrays.toString(eval));

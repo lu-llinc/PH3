@@ -14,8 +14,8 @@ import org.parboiled.support.ToStringFormatter;
 import org.parboiled.support.Var;
 import org.parboiled.trees.GraphNode;
 
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.parboiled.errors.ErrorUtils.printParseErrors;
 import static org.parboiled.support.ParseTreeUtils.printNodeTree;
@@ -31,13 +31,34 @@ import static org.parboiled.trees.GraphUtils.printTree;
 @BuildParseTree
 public class MatchParser extends BaseParser<MatchNode> {
 
-    public static Literal[][] compile(String expression){
-        return compile(expression, true, null);
+
+
+    public static MatchRuleSet compileRuleSet(String rules, boolean simplify, StringNormalizer normalizer){
+
+        List<MatchRule> ruleList = Arrays.stream(rules.split("\n"))
+                .map(String::trim)
+                .filter(s -> !s.startsWith("//") && !s.isEmpty())
+                .map(s -> compileRule(s, simplify, normalizer)).collect(Collectors.toList());
+
+        return new MatchRuleSet(ruleList);
+
     }
 
-    public static Literal[][] compile(String expression, boolean simplify, StringNormalizer normalizer){
+    public static MatchRule compileRule(String rule, boolean simplify, StringNormalizer normalizer){
+        String[] split = rule.split("=", 1);
+        if (split.length < 2){
+            throw new IllegalArgumentException("The rule does not assign a rule name (rule_name = ...)");
+        }
+        return new MatchRule(split[0].trim(), compileBody(split[1].trim(), simplify, normalizer));
+    }
+
+    public static Literal[][] compileBody(String expression){
+        return compileBody(expression, true, null);
+    }
+
+    public static Literal[][] compileBody(String expression, boolean simplify, StringNormalizer normalizer){
         MatchParser parser = Parboiled.createParser(MatchParser.class);
-        ParsingResult<?> result = new RecoveringParseRunner(parser.InputLine()).run(expression);
+        ParsingResult<?> result = new RecoveringParseRunner(parser.ExpressionLine()).run(expression);
         if (result.hasErrors()) {
             throw new IllegalArgumentException(printParseErrors(result));
         }
@@ -55,7 +76,11 @@ public class MatchParser extends BaseParser<MatchNode> {
         return CNFTransform.cnfListToCNFArray(cnfList);
     }
 
-    public Rule InputLine() {
+    public Rule RuleLine() {
+        return Sequence(Expression(), EOI);
+    }
+
+    public Rule ExpressionLine() {
         return Sequence(Expression(), EOI);
     }
 
@@ -99,10 +124,10 @@ public class MatchParser extends BaseParser<MatchNode> {
 
     Rule Atom() {
 //        return FirstOf(DoubleQuotedString(), SingleQuotedString(), UnquotedQuotedString(), SquareRoot(), Parens());
-        return FirstOf(DoubleQuotedString(), SingleQuotedString(), AnyOne(), AnyOneOrMore(), AnyZeroOrMore(), Not(), Parens(), UnquotedQuotedString());
+        return FirstOf(DoubleQuotedString(), SingleQuotedString(), AnyOne(), AnyOneOrMore(), AnyZeroOrMore(), Not(), LookUp(), Parens(), UnquotedQuotedString());
     }
 
-    /*Rule SquareRoot() {
+    /*MatchRule SquareRoot() {
         return Sequence(
                 "SQRT ",
                 Parens(),
@@ -118,8 +143,17 @@ public class MatchParser extends BaseParser<MatchNode> {
                 FirstOf("-", "NOT "), op.set(matchOrDefault("-")),
                 Atom(),
 
-                // create a new AST node with a special operator "R" and only one child
                 push(new MatchNode("-", pop(), null))
+        );
+    }
+
+    Rule LookUp() {
+        Var<String> op = new Var<>();
+        return Sequence(
+                FirstOf("#", "LOOKUP "), op.set(matchOrDefault("#")),
+                UnquotedQuotedString(),
+
+                push(new MatchNode("#", pop(), null))
         );
     }
 
@@ -139,7 +173,7 @@ public class MatchParser extends BaseParser<MatchNode> {
         return Sequence("*", push(new MatchNode("*")), WhiteSpace());
     }
 
-    /*Rule Number() {
+    /*MatchRule Number() {
         return Sequence(
                 // we use another Sequence in the "Number" Sequence so we can easily access the input text matched
                 // by the three enclosed rules with "match()" or "matchOrDefault()"
@@ -156,7 +190,7 @@ public class MatchParser extends BaseParser<MatchNode> {
         );
     }*/
 
-    /*Rule Digit() {
+    /*MatchRule Digit() {
         return CharRange("0", "9");
     }*/
 
@@ -220,7 +254,7 @@ public class MatchParser extends BaseParser<MatchNode> {
             String input = new Scanner(System.in).nextLine();
             if (StringUtils.isEmpty(input)) break;
 
-            ParsingResult<?> result = new RecoveringParseRunner(parser.InputLine()).run(input);
+            ParsingResult<?> result = new RecoveringParseRunner(parser.ExpressionLine()).run(input);
 
             if (result.hasErrors()) {
                 System.out.println("\nParse Errors:\n" + printParseErrors(result));

@@ -23,7 +23,7 @@ public class MatchEval {
      * @return whether the rule matches or not
      */
     public static boolean contains(final Token[] text, final Literal[][] cnf){
-        return findRange(text, cnf) != null;
+        return findRange(text, cnf, null) != null;
     }
 
     /**
@@ -32,7 +32,7 @@ public class MatchEval {
      * @param cnf match rule
      * @return whether the rule matches or not
      */
-    public static int[] findRange(final Token[] text, final Literal[][] cnf){
+    public static int[] findRange(final Token[] text, final Literal[][] cnf, MatchRuleSet context){
         final int S = text.length;
         if(cnf == null || cnf.length == 0){
             // no constraints, match entire text
@@ -46,7 +46,7 @@ public class MatchEval {
             int[] disjunctionRange = null;
 
             for (Literal lit : disjunction) {
-                if(cache.containsKey(lit)) {
+                if(lit.meta == 'a' && cache.containsKey(lit)) {
                     int[] cachedRange = cache.get(lit);
                     if (cachedRange != null) {
                         disjunctionRange = cachedRange; // already known to be true
@@ -55,9 +55,15 @@ public class MatchEval {
                         continue; // already known to be false
                     }
                 }
+                if(lit.meta == '#' && context != null){
+                    // perform lookup
+                    disjunctionRange = findRange(text, context.rules.get(lit.tokens[0].getWord()).body, context);
 
-                // evaluate the match
-                disjunctionRange = findRange(text, lit);
+                } else {
+                    // evaluate the match
+                    disjunctionRange = findRange(text, lit);
+                }
+
                 cache.put(lit, disjunctionRange);
                 if(disjunctionRange != null){
                     break; // matched! next disjunction please...

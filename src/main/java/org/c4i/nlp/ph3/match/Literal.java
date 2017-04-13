@@ -20,18 +20,23 @@ import java.util.stream.Collectors;
 public class Literal implements Comparable<Literal>{
     Token[] tokens;
     boolean negated;
+    char meta;
 
-    public Literal(Token[] tokens, boolean negated) {
+    public Literal(Token[] tokens, boolean negated, char meta) {
         this.tokens = tokens;
         this.negated = negated;
+        this.meta = meta;
     }
 
+    public Literal(Token token, char meta) {
+        this(new Token[]{token}, false, meta);
+    }
     public Literal(Token token, boolean negated) {
-        this(new Token[]{token}, negated);
+        this(new Token[]{token}, negated, 'a');
     }
 
     public Literal(Token token) {
-        this(new Token[]{token}, false);
+        this(new Token[]{token}, false, 'a');
     }
 
     public Token[] getTokens() {
@@ -49,6 +54,15 @@ public class Literal implements Comparable<Literal>{
 
     public Literal setNegated(boolean negated) {
         this.negated = negated;
+        return this;
+    }
+
+    public char getMeta() {
+        return meta;
+    }
+
+    public Literal setMeta(char meta) {
+        this.meta = meta;
         return this;
     }
 
@@ -74,7 +88,14 @@ public class Literal implements Comparable<Literal>{
 
     @Override
     public String toString() {
-        return Arrays.stream(tokens).map(Token::toString).collect(Collectors.joining("_", negated?"-":"", ""));
+        String tokens = Arrays.stream(this.tokens).map(Token::toString).collect(Collectors.joining("_"));
+        if(meta != 'a'){
+            tokens = meta+tokens;
+        }
+        if(negated){
+            tokens = "-"+tokens;
+        }
+        return tokens;
     }
 
     @Override

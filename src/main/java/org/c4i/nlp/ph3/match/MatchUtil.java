@@ -46,7 +46,7 @@ public class MatchUtil {
      * @return an expression in Conjunctive Normal Form
      */
     public static Literal[][] compilePattern(String pattern, StringNormalizer normalizer){
-        return MatchParser.compile(pattern, true, normalizer);
+        return MatchParser.compileBody(pattern, true, normalizer);
     }
 
     /**
@@ -55,7 +55,7 @@ public class MatchUtil {
      * @return an expression in Conjunctive Normal Form
      */
     public static Literal[][] compilePattern(String pattern){
-        return MatchParser.compile(pattern, true, DEFAULT_NORMALIZER);
+        return MatchParser.compileBody(pattern, true, DEFAULT_NORMALIZER);
     }
 
     /**
@@ -65,7 +65,7 @@ public class MatchUtil {
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
     public static int[] findRange(final Token[] text, final Literal[][] pattern){
-        return MatchEval.findRange(text, pattern);
+        return MatchEval.findRange(text, pattern, null);
     }
 
     /**
@@ -75,7 +75,7 @@ public class MatchUtil {
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
     public static int[] findRange(final String text, final Literal[][] pattern){
-        return MatchEval.findRange(textToTokens(text), pattern);
+        return MatchEval.findRange(textToTokens(text), pattern, null);
     }
 
     /**
@@ -85,7 +85,7 @@ public class MatchUtil {
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
     public static int[] findRange(final String text, final String pattern){
-        return MatchEval.findRange(textToTokens(text), compilePattern(pattern));
+        return MatchEval.findRange(textToTokens(text), compilePattern(pattern), null);
     }
 
     /**
@@ -96,7 +96,7 @@ public class MatchUtil {
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
     public static int[] findRange(final String text, final String pattern, final StringNormalizer normalizer){
-        return MatchEval.findRange(textToTokens(text, normalizer), compilePattern(pattern, normalizer));
+        return MatchEval.findRange(textToTokens(text, normalizer), compilePattern(pattern, normalizer), null);
     }
 
     /**

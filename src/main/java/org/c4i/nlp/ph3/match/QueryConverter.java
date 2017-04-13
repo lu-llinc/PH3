@@ -20,7 +20,7 @@ public class QueryConverter {
     protected String quoteEnd = "\"";
 
     public String convert(String rule){
-        return convert(MatchParser.compile(rule, true, null));
+        return convert(MatchParser.compileBody(rule, true, null));
     }
 
     public String convert(Literal[][] cnf) {

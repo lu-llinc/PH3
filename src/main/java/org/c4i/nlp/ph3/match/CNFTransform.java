@@ -234,7 +234,7 @@ public class CNFTransform {
             // concat arrays from left and right
             Token[] tokens = Arrays.copyOf(left.tokens, left.tokens.length + right.tokens.length);
             System.arraycopy(right.tokens, 0, tokens, left.tokens.length, right.tokens.length);
-            return new Literal(tokens, negated);
+            return new Literal(tokens, negated, 'a');
         } else {
             throw new IllegalStateException("Unexpected node in CNF expression: " + node);
         }
