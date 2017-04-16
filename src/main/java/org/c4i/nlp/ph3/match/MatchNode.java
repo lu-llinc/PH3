@@ -70,6 +70,7 @@ public class MatchNode extends ImmutableBinaryTreeNode<MatchNode> {
             case "?": return "?";
             case "+": return "+";
             case "*": return "*";
+            case "#": return "#";
             default:
                 throw new IllegalStateException();
         }

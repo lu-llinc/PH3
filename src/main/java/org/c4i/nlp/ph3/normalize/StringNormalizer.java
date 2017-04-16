@@ -18,6 +18,8 @@ public interface StringNormalizer extends Function<String, String>{
     String normalize(String string);
 
     default Token normalize(Token token){
+        if(token == null || token.getWord() == null)
+            return null;
         token.setNormalizedWord(normalize(token.getWord()));
         return token;
     }

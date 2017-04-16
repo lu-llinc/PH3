@@ -46,7 +46,7 @@ public class MatchEval {
             int[] disjunctionRange = null;
 
             for (Literal lit : disjunction) {
-                if(lit.meta == 'a' && cache.containsKey(lit)) {
+                if(cache.containsKey(lit)) {
                     int[] cachedRange = cache.get(lit);
                     if (cachedRange != null) {
                         disjunctionRange = cachedRange; // already known to be true

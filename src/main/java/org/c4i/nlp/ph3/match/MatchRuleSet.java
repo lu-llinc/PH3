@@ -40,7 +40,7 @@ public class MatchRuleSet {
             Arrays.stream(rule.body).flatMap(Arrays::stream).forEach(lit -> {
                 String lookup = lit.tokens[0].getWord();
                 if(lit.meta == '#' && !heads.contains(lookup)){
-                    throw new IllegalArgumentException(String.format("Rule '%s' contains a #lookup to a rule that is not defined: #%s.", rule.head, lookup));
+                    throw new IllegalArgumentException(String.format("Rule '%s' contains a lookup to a rule that is not defined: #%s.", rule.head, lookup));
                 }
             });
         }

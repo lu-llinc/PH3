@@ -235,6 +235,8 @@ public class CNFTransform {
             Token[] tokens = Arrays.copyOf(left.tokens, left.tokens.length + right.tokens.length);
             System.arraycopy(right.tokens, 0, tokens, left.tokens.length, right.tokens.length);
             return new Literal(tokens, negated, 'a');
+        } else if(node.isOperator("#")){
+            return new Literal(new Token(node.left().left().getValue()).setMatchOnNormalized(false), negated, '#');
         } else {
             throw new IllegalStateException("Unexpected node in CNF expression: " + node);
         }

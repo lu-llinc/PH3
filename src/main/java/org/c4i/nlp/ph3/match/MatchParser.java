@@ -45,7 +45,7 @@ public class MatchParser extends BaseParser<MatchNode> {
     }
 
     public static MatchRule compileRule(String rule, boolean simplify, StringNormalizer normalizer){
-        String[] split = rule.split("=", 1);
+        String[] split = rule.split("[=]", 2);
         if (split.length < 2){
             throw new IllegalArgumentException("The rule does not assign a rule name (rule_name = ...)");
         }
@@ -124,7 +124,7 @@ public class MatchParser extends BaseParser<MatchNode> {
 
     Rule Atom() {
 //        return FirstOf(DoubleQuotedString(), SingleQuotedString(), UnquotedQuotedString(), SquareRoot(), Parens());
-        return FirstOf(DoubleQuotedString(), SingleQuotedString(), AnyOne(), AnyOneOrMore(), AnyZeroOrMore(), Not(), LookUp(), Parens(), UnquotedQuotedString());
+        return FirstOf(DoubleQuotedString(), SingleQuotedString(), LookUp(), AnyOne(), AnyOneOrMore(), AnyZeroOrMore(), Not(),  Parens(), UnquotedQuotedString());
     }
 
     /*MatchRule SquareRoot() {

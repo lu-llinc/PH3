@@ -28,9 +28,14 @@ public class Literal implements Comparable<Literal>{
         this.meta = meta;
     }
 
+    public Literal(Token token, boolean negated, char meta) {
+        this(new Token[]{token}, negated, meta);
+    }
+
     public Literal(Token token, char meta) {
         this(new Token[]{token}, false, meta);
     }
+
     public Literal(Token token, boolean negated) {
         this(new Token[]{token}, negated, 'a');
     }
@@ -74,15 +79,15 @@ public class Literal implements Comparable<Literal>{
         Literal literal = (Literal) o;
 
         if (negated != literal.negated) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (meta != literal.meta) return false;
         return Arrays.equals(tokens, literal.tokens);
-
     }
 
     @Override
     public int hashCode() {
         int result = Arrays.hashCode(tokens);
         result = 31 * result + (negated ? 1 : 0);
+        result = 31 * result + (int) meta;
         return result;
     }
 
