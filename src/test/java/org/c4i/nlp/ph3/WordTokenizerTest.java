@@ -4,6 +4,7 @@ package org.c4i.nlp.ph3;
 import org.c4i.nlp.ph3.tokenize.MatchingWordTokenizer;
 import org.c4i.nlp.ph3.tokenize.SplittingWordTokenizer;
 import org.c4i.nlp.ph3.tokenize.Token;
+import org.c4i.nlp.ph3.tokenize.WordPredicates;
 
 import java.util.List;
 
@@ -21,6 +22,6 @@ public class WordTokenizerTest {
 
         List<Token> tokens = new MatchingWordTokenizer().tokenize(text);
         System.out.println("MatchingWordTokenizer().tokenize(text) = " + tokens);
-//        System.out.println("WordPredicates.filterSensible(words) = " + WordPredicates.filterTokens(tokens, WordPredicates.SENSIBLE));
+        System.out.println("WordPredicates.filterSensible(words) = " + WordPredicates.filterTokens(tokens, WordPredicates.SENSIBLE));
     }
 }
