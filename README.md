@@ -2,16 +2,41 @@
 
 *Arvid Halma - Centre for Innovation - Leiden University*
 
-Efficiently detect word sequences within a given text. 
+This library helps you to classify a text with labels/tags by creating matching rules in a DSL.
+A rule set is a declarative list of rules that looks as follows:
+
+```
+label_1 = expression_1
+label_2 = expression_2
+```
+
+for instance, when the rules 
+
+```
+fruit = (apple OR pear) AND NOT juice
+food = bread OR rice OR #fruit
+```
+
+are evaluated against the text `Do you like rice?`, the `food` label will be found to be applicable.
+
+When the same rule set is evaluated against `Apples is what I like`, both `food` and `fruit` are returned.
+
+In other words, this tool will efficiently scan for sequences within a given text. 
 
 Where regular expressions work on a character level, this pattern matcher works on a word level.
 More high-level matching incentives can then be used:
- - finding stemmed occurrences, where `'word'` = `'wording'` = `'words'`
- - finding word sequences with wildcards (where order is important): `the_?_book` matches "the great book", but not "the book" or "the super great book".
+ - finding stemmed/normalized occurrences, where `'juice'` = `'juicy'` = `'JUICES'`
+ - finding word sequences with wildcards (where order is important): `the_?_apple` matches "the red apple", but not "the apple" or "the super red apple".
+ - compose hierarchical rules, e.g. where `#fruit` in the `food` rule refers to the `fruit` expression
+ 
+### Internationalization ###
+The rule set can in principle be used for any unicode character sequences. That means it can be used from English to Arabic
 
+### Speed ###
 There is a query language that is compiled to a reusable form that can be used for efficient occurrence checking. It seems millions of patterns can be matched per second, although it is not profiled in a sophisticated way. Have a look at the test folder.
 
-## Defining Patterns ##  
+
+## Defining Pattern expressions ##  
 
 ### Words ###
 There are two types of word literals:

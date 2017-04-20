@@ -3,6 +3,8 @@ package org.c4i.nlp.ph3.match;
 import org.c4i.nlp.ph3.tokenize.Token;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -56,16 +58,22 @@ public class MatchRuleSet {
      * @param tokens
      * @return
      */
-    public Map<String, int[]> eval(Token[] tokens){
-        Map<String, int[]> result = new HashMap<>();
+    public Map<String, MatchRange> eval(Token[] tokens){
+        ConcurrentMap<String, MatchRange> result = new ConcurrentHashMap<>();
         for (MatchRule rule : rules.values()) {
-            int[] range = MatchEval.findRange(tokens, rule.expression, this);
+            int[] range = MatchEval.findRange(tokens, rule, this, result);
             if(range != null){
-                result.put(rule.head, range);
+                result.put(rule.head, new MatchRange(rule.head, range[0], range[1], tokens[range[0]].getCharStart(), tokens[range[1]-1].getCharEnd()));
             }
         }
         return result;
     }
+
+    public String highlight(String orgText, Map<String, MatchRange> eval){
+        return null;
+    }
+
+
 
 
     @Override

@@ -2,6 +2,7 @@ package org.c4i.nlp.ph3;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.c4i.nlp.ph3.match.MatchParser;
+import org.c4i.nlp.ph3.match.MatchRange;
 import org.c4i.nlp.ph3.match.MatchRuleSet;
 import org.c4i.nlp.ph3.normalize.StringNormalizer;
 import org.c4i.nlp.ph3.normalize.StringNormalizers;
@@ -31,22 +32,22 @@ public class RuleTest {
     @Test
     public void matchSimple1(){
         MatchRuleSet ruleSet = MatchParser.compileRuleSet("fruit = apple | pear", true, normalizer);
-        Map<String, int[]> eval = ruleSet.eval(textToTokens("I like apple juice", normalizer));
+        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("I like apple juice", normalizer));
 
-        for (Map.Entry<String, int[]> evalEntry : eval.entrySet()) {
-            System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
 
-        assertTrue(eval.containsKey("fruit"));
+        assertTrue(eval.containsKey("fruit") && eval.size() == 1);
     }
 
     @Test
     public void matchSimple2(){
         MatchRuleSet ruleSet = MatchParser.compileRuleSet("fruit = apple | pear", true, normalizer);
-        Map<String, int[]> eval = ruleSet.eval(textToTokens("I like cocktails", normalizer));
+        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("I like cocktails", normalizer));
 
-        for (Map.Entry<String, int[]> evalEntry : eval.entrySet()) {
-            System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
 
         assertTrue(eval.isEmpty());
@@ -58,13 +59,13 @@ public class RuleTest {
                 "fruit = apple | pear\n" +
                         "drink = milk | beer | cocktail",
                 true, normalizer);
-        Map<String, int[]> eval = ruleSet.eval(textToTokens("Me like cocktail", normalizer));
+        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("Me like cocktail", normalizer));
 
-        for (Map.Entry<String, int[]> evalEntry : eval.entrySet()) {
-            System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
 
-        assertTrue(eval.containsKey("drink"));
+        assertTrue(eval.containsKey("drink") && eval.size() == 1);
     }
 
     @Test
@@ -75,13 +76,13 @@ public class RuleTest {
                         "food = bread | #fruit",
 
                 false, normalizer);
-        Map<String, int[]> eval = ruleSet.eval(textToTokens("The monkey eats a pear", normalizer));
+        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("The monkey eats a pear", normalizer));
 
-        for (Map.Entry<String, int[]> evalEntry : eval.entrySet()) {
-            System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
 
-        assertTrue(eval.containsKey("food"));
+        assertTrue(eval.containsKey("food") && eval.containsKey("fruit"));
     }
 
     @Test
@@ -93,7 +94,7 @@ public class RuleTest {
 
                 false, normalizer);
 
-        Map<String, int[]> eval = null;
+        Map<String, MatchRange> eval = null;
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (int i = 0; i < N; i++) {
@@ -102,8 +103,36 @@ public class RuleTest {
         }
         stopWatch.stop();
 
-        for (Map.Entry<String, int[]> evalEntry : eval.entrySet()) {
-            System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
+        }
+        System.out.println("stopWatch = " + stopWatch);
+        assertTrue(eval.containsKey("food"));
+    }
+
+    @Test
+    public void matchSimple4nMarkup(){
+        MatchRuleSet ruleSet = MatchParser.compileRuleSet(
+                "// LANG = [ar,en], tokenize=word\n" +
+                        "// comment\n" +
+                        "\n" +
+                        "fruit = apple | pear\n" +
+                        "     drink = milk | beer | cocktail\n" +
+                        "food = bread | #fruit\n",
+
+                false, normalizer);
+
+        Map<String, MatchRange> eval = null;
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        for (int i = 0; i < N; i++) {
+            List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+            eval = ruleSet.eval(normalizer.normalizeTokens(tokens).toArray(new Token[tokens.size()]));
+        }
+        stopWatch.stop();
+
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
         System.out.println("stopWatch = " + stopWatch);
         assertTrue(eval.containsKey("food"));

@@ -61,21 +61,21 @@ public class MatchUtil {
     /**
      * Tries to finds the first possible occurrence of the pattern in the text.
      * @param text original text
-     * @param pattern a phrase expression
+     * @param rule a phrase expression
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
-    public static int[] findRange(final Token[] text, final Literal[][] pattern){
-        return MatchEval.findRange(text, pattern, null);
+    public static int[] findRange(final Token[] text, final MatchRule rule){
+        return MatchEval.findRange(text, rule, null, null);
     }
 
     /**
      * Tries to finds the first possible occurrence of the pattern in the text.
      * @param text original text
-     * @param pattern a phrase expression
+     * @param rule a phrase expression
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
-    public static int[] findRange(final String text, final Literal[][] pattern){
-        return MatchEval.findRange(textToTokens(text), pattern, null);
+    public static int[] findRange(final String text, final MatchRule rule){
+        return MatchEval.findRange(textToTokens(text), rule, null, null);
     }
 
     /**
@@ -85,7 +85,7 @@ public class MatchUtil {
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
     public static int[] findRange(final String text, final String pattern){
-        return MatchEval.findRange(textToTokens(text), compilePattern(pattern), null);
+        return MatchEval.findRange(textToTokens(text), new MatchRule(null, compilePattern(pattern)), null, null);
     }
 
     /**
@@ -96,7 +96,7 @@ public class MatchUtil {
      * @return a array of length 2: {token_start_index_inclusive, token_end_index_exclusive}, or null when the pattern was not found
      */
     public static int[] findRange(final String text, final String pattern, final StringNormalizer normalizer){
-        return MatchEval.findRange(textToTokens(text, normalizer), compilePattern(pattern, normalizer), null);
+        return MatchEval.findRange(textToTokens(text, normalizer), new MatchRule(null, compilePattern(pattern, normalizer)), null, null);
     }
 
     /**
@@ -131,7 +131,7 @@ public class MatchUtil {
      */
     public static boolean contains(Token[] text, String pattern, StringNormalizer normalizer){
         Literal[][] cnf = compilePattern(pattern, normalizer);
-        return MatchEval.contains(text, cnf);
+        return MatchEval.contains(text, new MatchRule(null, cnf));
     }
 
     /**
@@ -153,7 +153,7 @@ public class MatchUtil {
      * @return true if the pattern is found, false otherwise
      */
     public static boolean contains(Token[] text, Literal[][] pattern){
-        return MatchEval.contains(text, pattern);
+        return MatchEval.contains(text, new MatchRule(null, pattern));
     }
 
     /**

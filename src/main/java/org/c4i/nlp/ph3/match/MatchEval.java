@@ -3,6 +3,7 @@ package org.c4i.nlp.ph3.match;
 import org.c4i.nlp.ph3.tokenize.Token;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Evaluate a matching rule.
@@ -19,22 +20,22 @@ public class MatchEval {
     /**
      * Apply a rule in CNF to a list of tokens
      * @param text the list of tokens (text) to search in
-     * @param cnf match rule
+     * @param rule match rule
      * @return whether the rule matches or not
      */
-    public static boolean contains(final Token[] text, final Literal[][] cnf){
-        return findRange(text, cnf, null) != null;
+    public static boolean contains(final Token[] text, final MatchRule rule){
+        return findRange(text, rule, null, null) != null;
     }
 
     /**
      * Apply a rule in CNF to a list of tokens
      * @param text the list of tokens (text) to search in
-     * @param cnf match rule
+     * @param rule match rule
      * @return whether the rule matches or not
      */
-    public static int[] findRange(final Token[] text, final Literal[][] cnf, MatchRuleSet context){
+    public static int[] findRange(final Token[] text, final MatchRule rule, MatchRuleSet context, Map<String, MatchRange> result){
         final int S = text.length;
-        if(cnf == null || cnf.length == 0){
+        if(rule.expression == null || rule.expression.length == 0){
             // no constraints, match entire text
             return new int[]{0, S};
         }
@@ -42,7 +43,7 @@ public class MatchEval {
         int[] rangeFound = null;
         HashMap<Literal, int[]> cache = new HashMap<>();
 
-        for (Literal[] disjunction : cnf) {
+        for (Literal[] disjunction : rule.expression) {
             int[] disjunctionRange = null;
 
             for (Literal lit : disjunction) {
@@ -55,9 +56,18 @@ public class MatchEval {
                         continue; // already known to be false
                     }
                 }
+
+
                 if(lit.meta == '#' && context != null){
-                    // perform lookup
-                    disjunctionRange = findRange(text, context.rules.get(lit.tokens[0].getWord()).expression, context);
+                    if(result != null && result.containsKey(rule.head)){
+                        // already known to be true
+                        MatchRange matchRange = result.get(rule.head);
+                        disjunctionRange = new int[]{matchRange.tokenStart, matchRange.tokenEnd};
+                        break;
+                    } else {
+                        // perform lookup
+                        disjunctionRange = findRange(text, context.rules.get(lit.tokens[0].getWord()), context, result);
+                    }
 
                 } else {
                     // evaluate the match

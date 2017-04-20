@@ -4,6 +4,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.c4i.nlp.ph3.match.Literal;
 import org.c4i.nlp.ph3.match.MatchEval;
 import org.c4i.nlp.ph3.match.MatchParser;
+import org.c4i.nlp.ph3.match.MatchRule;
 import org.c4i.nlp.ph3.normalize.StringNormalizer;
 import org.c4i.nlp.ph3.normalize.StringNormalizers;
 import org.c4i.nlp.ph3.tokenize.MatchingWordTokenizer;
@@ -170,7 +171,7 @@ public class MatchTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (int i = 0; i < N; i++) {
-            eval = MatchEval.findRange(tokens, cnf, null);
+            eval = MatchEval.findRange(tokens, new MatchRule(null, cnf), null, null);
         }
         stopWatch.stop();
         System.out.println(" - eval = " + Arrays.toString(eval));
