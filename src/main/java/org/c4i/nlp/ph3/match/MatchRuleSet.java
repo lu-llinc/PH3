@@ -38,7 +38,7 @@ public class MatchRuleSet {
     private void checkLookups(){
         Set<String> heads = rules.keySet();
         for (MatchRule rule : rules.values()) {
-            Arrays.stream(rule.body).flatMap(Arrays::stream).forEach(lit -> {
+            Arrays.stream(rule.expression).flatMap(Arrays::stream).forEach(lit -> {
                 String lookup = lit.tokens[0].getWord();
                 if(lit.meta == '#') {
                     if (!heads.contains(lookup)) {
@@ -52,14 +52,14 @@ public class MatchRuleSet {
     }
 
     /**
-     * Reurn all matching heads
+     * Reurn all matching labels
      * @param tokens
      * @return
      */
     public Map<String, int[]> eval(Token[] tokens){
         Map<String, int[]> result = new HashMap<>();
         for (MatchRule rule : rules.values()) {
-            int[] range = MatchEval.findRange(tokens, rule.body, this);
+            int[] range = MatchEval.findRange(tokens, rule.expression, this);
             if(range != null){
                 result.put(rule.head, range);
             }

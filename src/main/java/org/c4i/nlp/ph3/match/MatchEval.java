@@ -57,7 +57,7 @@ public class MatchEval {
                 }
                 if(lit.meta == '#' && context != null){
                     // perform lookup
-                    disjunctionRange = findRange(text, context.rules.get(lit.tokens[0].getWord()).body, context);
+                    disjunctionRange = findRange(text, context.rules.get(lit.tokens[0].getWord()).expression, context);
 
                 } else {
                     // evaluate the match
