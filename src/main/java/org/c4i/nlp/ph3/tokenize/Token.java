@@ -22,6 +22,8 @@ public class Token implements Comparable<Token>, CharSequence{
     private double weight;
     private boolean matchOnNormalized = true;
 
+    private int charStart, charEnd;
+
     public Token(String word) {
         this.word = word;
         this.normalizedWord = word;
@@ -153,6 +155,24 @@ public class Token implements Comparable<Token>, CharSequence{
     @Override
     public CharSequence subSequence(int start, int end) {
         return toString().subSequence(start, end);
+    }
+
+    public int getCharStart() {
+        return charStart;
+    }
+
+    public Token setCharStart(int charStart) {
+        this.charStart = charStart;
+        return this;
+    }
+
+    public int getCharEnd() {
+        return charEnd;
+    }
+
+    public Token setCharEnd(int charEnd) {
+        this.charEnd = charEnd;
+        return this;
     }
 
     @Override

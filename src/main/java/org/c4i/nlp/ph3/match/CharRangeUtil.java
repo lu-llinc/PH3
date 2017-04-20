@@ -10,13 +10,14 @@ import java.util.TreeMap;
  *
  * http://jrgraphix.net/r/Unicode/
  * @author Arvid Halma
- * @version 2', '\u4-2017 - 2:11
+ * @version 20-04-2017 - 2:11
  */
 public class CharRangeUtil {
 
     public static Map<String, char[]> RANGES = new TreeMap<>();
 
     static {
+        // custom subranges from "Basic Latin"
         RANGES.put("Basic Latin Uppercase", new char[]{'A', 'Z'});
         RANGES.put("Basic Latin Lowercase", new char[]{'a', 'z'});
         RANGES.put("Basic Latin Accents", new char[]{'\u00c0', '\u00ff'});

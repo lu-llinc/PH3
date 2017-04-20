@@ -30,7 +30,9 @@ public class MatchingWordTokenizer implements Tokenizer {
         List<Token> words = new ArrayList<>();
         int loc = 0;
         while (matcher.find()) {
-            words.add(new Token(matcher.group().trim(), loc++));
+            Token token = new Token(matcher.group().trim(), loc++);
+            token.setCharStart(matcher.start()).setCharEnd(matcher.end());
+            words.add(token);
         }
         return words;
     }
