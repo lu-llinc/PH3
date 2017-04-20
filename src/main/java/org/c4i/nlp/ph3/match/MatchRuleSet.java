@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * A list of rules that define tags that may be triggered, given their corresponding expressions.
  * @author Arvid Halma
  * @version 13-4-2017 - 20:52
  */
@@ -39,8 +40,12 @@ public class MatchRuleSet {
         for (MatchRule rule : rules.values()) {
             Arrays.stream(rule.body).flatMap(Arrays::stream).forEach(lit -> {
                 String lookup = lit.tokens[0].getWord();
-                if(lit.meta == '#' && !heads.contains(lookup)){
-                    throw new IllegalArgumentException(String.format("Rule '%s' contains a lookup to a rule that is not defined: #%s.", rule.head, lookup));
+                if(lit.meta == '#') {
+                    if (!heads.contains(lookup)) {
+                        throw new IllegalArgumentException(String.format("Rule '%s' contains a lookup to a rule that is not defined: #%s.", rule.head, lookup));
+                    } else if (rule.head.equals(lookup)) {
+                        throw new IllegalArgumentException(String.format("Rule '%s' contains a lookup to itself. No recursion allowed.", lookup));
+                    }
                 }
             });
         }

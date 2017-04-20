@@ -1,15 +1,17 @@
 package org.c4i.nlp.ph3;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.c4i.nlp.ph3.match.MatchParser;
 import org.c4i.nlp.ph3.match.MatchRuleSet;
 import org.c4i.nlp.ph3.normalize.StringNormalizer;
 import org.c4i.nlp.ph3.normalize.StringNormalizers;
-import org.c4i.nlp.ph3.tokenize.MatchingWordTokenizer;
 import org.c4i.nlp.ph3.tokenize.SplittingWordTokenizer;
+import org.c4i.nlp.ph3.tokenize.Token;
 import org.c4i.nlp.ph3.tokenize.Tokenizer;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.c4i.nlp.ph3.match.MatchUtil.textToTokens;
@@ -79,6 +81,31 @@ public class RuleTest {
             System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
         }
 
+        assertTrue(eval.containsKey("food"));
+    }
+
+    @Test
+    public void matchSimple4n(){
+        MatchRuleSet ruleSet = MatchParser.compileRuleSet(
+                "fruit = apple | pear\n" +
+                        "drink = milk | beer | cocktail\n" +
+                        "food = bread | #fruit",
+
+                false, normalizer);
+
+        Map<String, int[]> eval = null;
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        for (int i = 0; i < N; i++) {
+            List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+            eval = ruleSet.eval(normalizer.normalizeTokens(tokens).toArray(new Token[tokens.size()]));
+        }
+        stopWatch.stop();
+
+        for (Map.Entry<String, int[]> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + Arrays.toString(evalEntry.getValue()));
+        }
+        System.out.println("stopWatch = " + stopWatch);
         assertTrue(eval.containsKey("food"));
     }
 
