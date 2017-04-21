@@ -89,6 +89,7 @@ public class RuleTest {
     public void matchSimple4n(){
         MatchRuleSet ruleSet = MatchParser.compileRuleSet(
                 "fruit = apple | pear\n" +
+                        "animal = bear & -beer OR monkey\n" +
                         "drink = milk | beer | cocktail\n" +
                         "food = bread | #fruit",
 
@@ -97,8 +98,9 @@ public class RuleTest {
         Map<String, MatchRange> eval = null;
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+        String text = "The monkey eats a pear";
         for (int i = 0; i < N; i++) {
-            List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+            List<Token> tokens = tokenizer.tokenize(text);
             eval = ruleSet.eval(normalizer.normalizeTokens(tokens).toArray(new Token[tokens.size()]));
         }
         stopWatch.stop();
@@ -107,6 +109,7 @@ public class RuleTest {
             System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
         System.out.println("stopWatch = " + stopWatch);
+        System.out.println(ruleSet.highlight(text, eval));
         assertTrue(eval.containsKey("food"));
     }
 
@@ -118,16 +121,63 @@ public class RuleTest {
                         "\n" +
                         "fruit = apple | pear\n" +
                         "     drink = milk | beer | cocktail\n" +
-                        "food = bread | #fruit\n",
+                        "food = bread | #fruit\n" +
+                        "food1 = bread | #fruit\n" +
+                        "food2 = bread | #fruit\n" +
+                        "food3 = bread | #fruit\n" +
+                        "food4 = bread | #fruit\n" +
+                        "food5 = bread | #fruit\n" +
+                        "food6 = bread | #fruit\n" +
+                        "food7 = bread | #fruit\n",
+
+                false, normalizer);
+
+        Map<String, MatchRange> eval = null;
+        StopWatch stopWatch = new StopWatch();
+
+        stopWatch.start();
+        List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+        tokens = normalizer.normalizeTokens(tokens);
+        Token[] tokens1 = tokens.toArray(new Token[tokens.size()]);
+        for (int i = 0; i < N; i++) {
+            eval = ruleSet.eval(tokens1);
+        }
+        stopWatch.stop();
+
+        for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
+            System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
+        }
+        System.out.println("stopWatch = " + stopWatch);
+        assertTrue(eval.containsKey("food"));
+    }
+
+    @Test
+    public void matchSimple4nMarkupPar(){
+        MatchRuleSet ruleSet = MatchParser.compileRuleSet(
+                "// LANG = [ar,en], tokenize=word\n" +
+                        "// comment\n" +
+                        "\n" +
+                        "fruit = apple | pear\n" +
+                        "     drink = milk | beer | cocktail\n" +
+                        "food = bread | #fruit\n" +
+                        "food1 = bread | #fruit\n" +
+                        "food2 = bread | #fruit\n" +
+                        "food3 = bread | #fruit\n" +
+                        "food4 = bread | #fruit\n" +
+                        "food5 = bread | #fruit\n" +
+                        "food6 = bread | #fruit\n" +
+                        "food7 = bread | #fruit\n",
 
                 false, normalizer);
 
         Map<String, MatchRange> eval = null;
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+        List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+        tokens = normalizer.normalizeTokens(tokens);
+        Token[] tokens1 = tokens.toArray(new Token[tokens.size()]);
         for (int i = 0; i < N; i++) {
-            List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
-            eval = ruleSet.eval(normalizer.normalizeTokens(tokens).toArray(new Token[tokens.size()]));
+            eval = ruleSet.evalParallel(tokens1);
         }
         stopWatch.stop();
 

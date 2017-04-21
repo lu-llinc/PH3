@@ -4,7 +4,6 @@ import org.c4i.nlp.ph3.tokenize.Token;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public class MatchRuleSet {
 
-    Map<String, MatchRule> rules;
+    final Map<String, MatchRule> rules;
 
     public MatchRuleSet() {
         rules = new HashMap<>();
@@ -59,18 +58,60 @@ public class MatchRuleSet {
      * @return
      */
     public Map<String, MatchRange> eval(Token[] tokens){
-        ConcurrentMap<String, MatchRange> result = new ConcurrentHashMap<>();
-        for (MatchRule rule : rules.values()) {
+        final Map<String, MatchRange> result = new ConcurrentHashMap<>();
+        rules.values().forEach(rule -> {
             int[] range = MatchEval.findRange(tokens, rule, this, result);
             if(range != null){
                 result.put(rule.head, new MatchRange(rule.head, range[0], range[1], tokens[range[0]].getCharStart(), tokens[range[1]-1].getCharEnd()));
             }
-        }
+        });
         return result;
     }
 
-    public String highlight(String orgText, Map<String, MatchRange> eval){
-        return null;
+    /**
+     * Reurn all matching labels
+     * @param tokens
+     * @return
+     */
+    public Map<String, MatchRange> evalParallel(final Token[] tokens){
+        final Map<String, MatchRange> result = new ConcurrentHashMap<>();
+        rules.values().stream().parallel().forEach(rule -> {
+            int[] range = MatchEval.findRange(tokens, rule, this, result);
+            if(range != null){
+                result.put(rule.head, new MatchRange(rule.head, range[0], range[1], tokens[range[0]].getCharStart(), tokens[range[1]-1].getCharEnd()));
+            }
+        });
+        return result;
+    }
+
+
+
+    public static String highlight(String orgText, Map<String, MatchRange> eval){
+        StringBuilder sb = new StringBuilder();
+        Collection<MatchRange> ranges = eval.values();
+        for (int i = 0; i < orgText.length(); i++) {
+            for (MatchRange range : ranges) {
+                if(range.charStart == i){
+                    sb.append("<span class=\"match ").append(range.label).append("\">");
+                }
+                if(range.charEnd == i){
+                    sb.append("</span>");
+                }
+            }
+            char c = orgText.charAt(i);
+            if(c == '\n'){
+                sb.append("<br/>");
+            }
+            sb.append(c);
+        }
+
+        for (MatchRange range : ranges) {
+            if(range.charEnd == orgText.length()){
+                sb.append("</span>");
+            }
+        }
+
+        return sb.toString();
     }
 
 

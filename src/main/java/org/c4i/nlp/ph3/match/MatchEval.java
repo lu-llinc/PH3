@@ -33,7 +33,7 @@ public class MatchEval {
      * @param rule match rule
      * @return whether the rule matches or not
      */
-    public static int[] findRange(final Token[] text, final MatchRule rule, MatchRuleSet context, Map<String, MatchRange> result){
+    public static int[] findRange(final Token[] text, final MatchRule rule, final MatchRuleSet context, final Map<String, MatchRange> result){
         final int S = text.length;
         if(rule.expression == null || rule.expression.length == 0){
             // no constraints, match entire text
