@@ -1,6 +1,7 @@
 package org.c4i.nlp.ph3;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.c4i.nlp.ph3.match.MatchEval;
 import org.c4i.nlp.ph3.match.MatchParser;
 import org.c4i.nlp.ph3.match.MatchRange;
 import org.c4i.nlp.ph3.match.MatchRuleSet;
@@ -26,13 +27,13 @@ public class RuleTest {
 
     private Tokenizer tokenizer = new SplittingWordTokenizer();
     private StringNormalizer normalizer = StringNormalizers.LOWER_CASE;
-    private final static int N = 1_000_000;
+    private final static int N = 1_00_000;
 
 
     @Test
     public void matchSimple1(){
         MatchRuleSet ruleSet = MatchParser.compileRuleSet("fruit = apple | pear", true, normalizer);
-        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("I like apple juice", normalizer));
+        Map<String, MatchRange> eval = MatchEval.eval(ruleSet, textToTokens("I like apple juice", normalizer));
 
         for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
             System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
@@ -44,7 +45,7 @@ public class RuleTest {
     @Test
     public void matchSimple2(){
         MatchRuleSet ruleSet = MatchParser.compileRuleSet("fruit = apple | pear", true, normalizer);
-        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("I like cocktails", normalizer));
+        Map<String, MatchRange> eval = MatchEval.eval(ruleSet, textToTokens("I like cocktails", normalizer));
 
         for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
             System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
@@ -59,7 +60,7 @@ public class RuleTest {
                 "fruit = apple | pear\n" +
                         "drink = milk | beer | cocktail",
                 true, normalizer);
-        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("Me like cocktail", normalizer));
+        Map<String, MatchRange> eval = MatchEval.eval(ruleSet, textToTokens("Me like cocktail", normalizer));
 
         for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
             System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
@@ -76,7 +77,7 @@ public class RuleTest {
                         "food = bread | #fruit",
 
                 false, normalizer);
-        Map<String, MatchRange> eval = ruleSet.eval(textToTokens("The monkey eats a pear", normalizer));
+        Map<String, MatchRange> eval = MatchEval.eval(ruleSet, textToTokens("The monkey eats a pear", normalizer));
 
         for (Map.Entry<String, MatchRange> evalEntry : eval.entrySet()) {
             System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
@@ -101,7 +102,7 @@ public class RuleTest {
         String text = "The monkey eats a pear";
         for (int i = 0; i < N; i++) {
             List<Token> tokens = tokenizer.tokenize(text);
-            eval = ruleSet.eval(normalizer.normalizeTokens(tokens).toArray(new Token[tokens.size()]));
+            eval = MatchEval.eval(ruleSet, normalizer.normalizeTokens(tokens).toArray(new Token[tokens.size()]));
         }
         stopWatch.stop();
 
@@ -109,7 +110,7 @@ public class RuleTest {
             System.out.println(evalEntry.getKey() + " @ " + evalEntry.getValue());
         }
         System.out.println("stopWatch = " + stopWatch);
-        System.out.println(ruleSet.highlight(text, eval));
+        System.out.println(MatchEval.highlight(text, eval));
         assertTrue(eval.containsKey("food"));
     }
 
@@ -136,11 +137,11 @@ public class RuleTest {
         StopWatch stopWatch = new StopWatch();
 
         stopWatch.start();
-        List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
-        tokens = normalizer.normalizeTokens(tokens);
-        Token[] tokens1 = tokens.toArray(new Token[tokens.size()]);
         for (int i = 0; i < N; i++) {
-            eval = ruleSet.eval(tokens1);
+            List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+            tokens = normalizer.normalizeTokens(tokens);
+            Token[] tokens1 = tokens.toArray(new Token[tokens.size()]);
+            eval = MatchEval.eval(ruleSet, tokens1);
         }
         stopWatch.stop();
 
@@ -173,11 +174,11 @@ public class RuleTest {
         Map<String, MatchRange> eval = null;
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
-        tokens = normalizer.normalizeTokens(tokens);
-        Token[] tokens1 = tokens.toArray(new Token[tokens.size()]);
         for (int i = 0; i < N; i++) {
-            eval = ruleSet.evalParallel(tokens1);
+            List<Token> tokens = tokenizer.tokenize("The monkey eats a pear");
+            tokens = normalizer.normalizeTokens(tokens);
+            Token[] tokens1 = tokens.toArray(new Token[tokens.size()]);
+            eval = MatchEval.evalParallel(ruleSet, tokens1);
         }
         stopWatch.stop();
 

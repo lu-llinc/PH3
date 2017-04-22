@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class MatchTest {
     private Tokenizer tokenizer = new MatchingWordTokenizer();
-    private StringNormalizer normalizer = StringNormalizers.LOWER_CASE;
+    private StringNormalizer normalizer = StringNormalizers.DEFAULT_STEMMED_I18N;
     private final static int N = 1_000_000;
 
 
@@ -153,6 +153,10 @@ public class MatchTest {
         match(true, "Come to The Hague to join the Hub!", "Hello & world OR -(join_the_hub) OR ?_Hague");
     }
 
+    @Test
+    public void matchArab1(){
+        match(true, "تعال إلى لاهاي للانضمام إلى المحور!", "Hello & world OR لاهاي");
+    }
 
 
     private void match(boolean expected, String text, String pattern){

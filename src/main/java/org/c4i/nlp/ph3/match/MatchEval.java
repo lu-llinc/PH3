@@ -2,8 +2,10 @@ package org.c4i.nlp.ph3.match;
 
 import org.c4i.nlp.ph3.tokenize.Token;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Evaluate a matching rule.
@@ -15,6 +17,66 @@ import java.util.Map;
 public class MatchEval {
 
     public MatchEval() {
+    }
+
+    /**
+     * Reurn all matching labels
+     * @param tokens
+     * @return
+     */
+    public static Map<String, MatchRange> eval(final MatchRuleSet ruleSet, final Token[] tokens){
+        final Map<String, MatchRange> result = new ConcurrentHashMap<>();
+        ruleSet.rules.values().forEach(rule -> {
+            int[] range = MatchEval.findRange(tokens, rule, ruleSet, result);
+            if(range != null){
+                result.put(rule.head, new MatchRange(rule.head, range[0], range[1], tokens[range[0]].getCharStart(), tokens[range[1]-1].getCharEnd()));
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Reurn all matching labels
+     * @param tokens
+     * @return
+     */
+    public static Map<String, MatchRange> evalParallel(final MatchRuleSet ruleSet, final Token[] tokens){
+        final Map<String, MatchRange> result = new ConcurrentHashMap<>();
+        ruleSet.rules.values().stream().parallel().forEach(rule -> {
+            int[] range = MatchEval.findRange(tokens, rule, ruleSet, result);
+            if(range != null){
+                result.put(rule.head, new MatchRange(rule.head, range[0], range[1], tokens[range[0]].getCharStart(), tokens[range[1]-1].getCharEnd()));
+            }
+        });
+        return result;
+    }
+
+    public static String highlight(String orgText, Map<String, MatchRange> eval){
+        StringBuilder sb = new StringBuilder();
+        Collection<MatchRange> ranges = eval.values();
+        for (int i = 0; i < orgText.length(); i++) {
+            for (MatchRange range : ranges) {
+                if(range.charStart == i){
+                    sb.append("<span class=\"match ").append(range.label).append("\">");
+                }
+                if(range.charEnd == i){
+                    sb.append("</span>");
+                }
+            }
+            char c = orgText.charAt(i);
+            if(c == '\n'){
+                sb.append("<br/>");
+            }
+            sb.append(c);
+        }
+
+        for (MatchRange range : ranges) {
+            if(range.charEnd == orgText.length()){
+                sb.append("</span>");
+            }
+        }
+
+        return sb.toString();
     }
 
     /**

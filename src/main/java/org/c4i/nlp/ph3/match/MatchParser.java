@@ -224,12 +224,18 @@ public class MatchParser extends BaseParser<MatchNode> {
     Rule UnquotedQuotedString() {
         return Sequence(
                 OneOrMore(FirstOf(
-                        CharRange('A','Z'), // upper case
-                        CharRange('a','z'), // lower case
-                        CharRange('0','9'), // digits
-                        CharRange('\u00c0','\u00ff') // Latin chars with accents
+                        CharRange("Basic Latin Uppercase"),
+                        CharRange("Basic Latin Lowercase"),
+                        CharRange("Basic Latin Accents"),
+                        CharRange("Digits"),
+                        CharRange("Arabic")
                 )),
                 push(new MatchNode("A", new MatchNode(matchOrDefault("")), null)), WhiteSpace());
+    }
+
+    Rule CharRange(String name){
+        char[] chars = CharRangeUtil.RANGES.get(name);
+        return CharRange(chars[0], chars[1]);
     }
 
 

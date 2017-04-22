@@ -35,7 +35,11 @@ public class StringNormalizers {
 
     public static StringNormalizer STEMMED = new PorterStemmer();
 
+    public static StringNormalizer STEMMED_I18N = new ArabicStemmer().compose(new PorterStemmer());
+
     public static StringNormalizer DEFAULT_STEMMED = STEMMED.compose(DEFAULT);
+
+    public static StringNormalizer DEFAULT_STEMMED_I18N = STEMMED_I18N.compose(new ArabicNormalizer()).compose(DEFAULT);
 
 
 }
